@@ -11,7 +11,7 @@ services:
       - ./db/init:/docker-entrypoint-initdb.d
 
   wordpress:
-    image: wordpress:php8.2-fpm
+    image: wordpress:apache
     container_name: wp_app
     restart: unless-stopped
     environment:
