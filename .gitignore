@@ -1,0 +1,19 @@
+.env
+Material/
+.vscode
+
+db/data/
+db/init/
+
+wordpress/wp-content/uploads/
+wordpress/wp-content/cache/
+wordpress/wp-content/upgrade/
+
+certs/
+
+# Logs
+*.log
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
