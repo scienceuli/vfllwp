@@ -26,6 +26,8 @@ services:
       VIRTUAL_HOST: ${DOMAIN}
       LETSENCRYPT_HOST: ${DOMAIN}
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+      WP_HOME: https://blog-dev.vfll.de
+      WP_SITEURL: https://blog-dev.vfll.de
     volumes:
       - ./wordpress:/var/www/html
     depends_on:
