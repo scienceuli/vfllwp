@@ -21,7 +21,7 @@ services:
       - db
 
   nginx:
-    image: nginx:stable-alpine
+    image: jwilder/nginx-proxy:alpine
     container_name: nginx-proxy
     restart: unless-stopped
     ports:
