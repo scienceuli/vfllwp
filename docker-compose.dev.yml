@@ -1,0 +1,48 @@
+version: "3.9"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: wp_db
+    restart: unless-stopped
+    env_file: 
+    - .env.dev
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${WORDPRESS_DB_USER}
+      MYSQL_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      WORDPRESS_TABLE_PREFIX: ${WORDPRESS_TABLE_PREFIX}
+      PRODUCTION_URL: ${DOMAIN}
+    volumes:
+      - ./database:/var/lib/mysql
+      - ./mysqldumps/wp-db-backup.sql.gz:/docker-entrypoint-initdb.d/wp-db-backup.sql.gz
+      - ./db/init/migrate.sh:/docker-entrypoint-initdb.d/migrate.sh
+
+  wordpress:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: wp_app
+    restart: unless-stopped
+    env_file:
+    - .env.dev
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+      VIRTUAL_HOST: ${DOMAIN}
+      WP_HOME: https://blog-dev.vfll.de
+      WP_SITEURL: https://blog-dev.vfll.de
+      WORDPRESS_TABLE_PREFIX: ${WORDPRESS_TABLE_PREFIX}
+      WORDPRESS_DEBUG: ${WP_DEBUG_MODE}
+      DISABLED_PLUGINS: ${WP_PLUGINS_TO_DISABLE}
+    volumes:
+      - ./wordpress/wp-content:/var/www/html/wp-content
+    depends_on:
+      - db
+
+  
+
+  
