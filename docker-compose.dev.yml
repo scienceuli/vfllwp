@@ -1,48 +1,48 @@
-version: "3.9"
+version: '3.3'
 
 services:
-  db:
-    image: mysql:8.0
-    container_name: wp_db
-    restart: unless-stopped
-    env_file: 
-    - .env.dev
-    environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${WORDPRESS_DB_USER}
-      MYSQL_PASSWORD: ${WORDPRESS_DB_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      WORDPRESS_TABLE_PREFIX: ${WORDPRESS_TABLE_PREFIX}
-      PRODUCTION_URL: ${DOMAIN}
-    volumes:
-      - ./database:/var/lib/mysql
-      - ./mysqldumps/wp-db-backup.sql.gz:/docker-entrypoint-initdb.d/wp-db-backup.sql.gz
-      - ./db/init/migrate.sh:/docker-entrypoint-initdb.d/migrate.sh
-
   wordpress:
+    container_name: wordpress
+    depends_on:
+      - db
     build: 
       context: .
       dockerfile: Dockerfile
-    container_name: wp_app
-    restart: unless-stopped
-    env_file:
-    - .env.dev
-    environment:
-      WORDPRESS_DB_HOST: db
-      WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
-      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
-      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
-      VIRTUAL_HOST: ${DOMAIN}
-      WP_HOME: https://blog-dev.vfll.de
-      WP_SITEURL: https://blog-dev.vfll.de
-      WORDPRESS_TABLE_PREFIX: ${WORDPRESS_TABLE_PREFIX}
-      WORDPRESS_DEBUG: ${WP_DEBUG_MODE}
-      DISABLED_PLUGINS: ${WP_PLUGINS_TO_DISABLE}
     volumes:
-      - ./wordpress/wp-content:/var/www/html/wp-content
-    depends_on:
-      - db
-
+      - ./site/wp-content:/var/www/html/wp-content
+    ports:
+      - '80:80'
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: $db_host
+      WORDPRESS_DB_USER: $db_user
+      WORDPRESS_DB_PASSWORD: $db_password
+      WORDPRESS_TABLE_PREFIX: $db_table_prefix
+      WORDPRESS_DEBUG: $wp_debug_mode
+      DISABLED_PLUGINS: $wp_plugins_to_disable
+  db:
+    container_name: wp_db
+    image: mysql:5.7
+    volumes:
+      - ./database:/var/lib/mysql
+      - ./mysqldumps/backup.sql.gz:/docker-entrypoint-initdb.d/backup.sql.gz
+      - ./init/migrate.sh:/docker-entrypoint-initdb.d/migrate.sh
+    restart: always
+    ports: 
+      - '3306:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: $db_root_password
+      MYSQL_DATABASE: $db_name
+      MYSQL_USER: $db_user
+      MYSQL_PASSWORD: $db_password
+      WORDPRESS_TABLE_PREFIX: $db_table_prefix
+      PRODUCTION_URL: $production_url
   
+  adminer:
+    container_name: adminer
+    image: adminer
+    restart: always
+    ports:
+      - '8080:8080'
 
   
