@@ -18,7 +18,7 @@ services:
       PRODUCTION_URL: $production_url
 
   wordpress:
-    container_name: wordpress:apache
+    container_name: wordpress
     depends_on:
       - db
     build: 
