@@ -2,36 +2,43 @@ version: "3.9"
 
 services:
   db:
-    image: mysql:8.0
     container_name: wp_db
-    restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: ${WORDPRESS_DB_NAME}
-      MYSQL_USER: ${WORDPRESS_DB_USER}
-      MYSQL_PASSWORD: ${WORDPRESS_DB_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    image: mysql:8.0
     volumes:
-      - ./db/data:/var/lib/mysql
-      - ./db/init:/docker-entrypoint-initdb.d
+      - ./database:/var/lib/mysql
+      - ./mysqldumps/backup.sql.gz:/docker-entrypoint-initdb.d/backup.sql.gz
+      - ./init/migrate.sh:/docker-entrypoint-initdb.d/migrate.sh
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: $db_root_password
+      MYSQL_DATABASE: $db_name
+      MYSQL_USER: $db_user
+      MYSQL_PASSWORD: $db_password
+      WORDPRESS_TABLE_PREFIX: $db_table_prefix
+      PRODUCTION_URL: $production_url
 
   wordpress:
-    image: wordpress:apache
-    container_name: wp_app
-    restart: unless-stopped
-    environment:
-      WORDPRESS_DB_HOST: db
-      WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
-      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
-      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
-      VIRTUAL_HOST: ${DOMAIN}
-      LETSENCRYPT_HOST: ${DOMAIN}
-      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
-      WP_HOME: https://blog-dev.vfll.de
-      WP_SITEURL: https://blog-dev.vfll.de
-    volumes:
-      - ./wordpress:/var/www/html
+    container_name: wordpress:apache
     depends_on:
       - db
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./wordpress:/var/www/html
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: $db_host
+      WORDPRESS_DB_USER: $db_user
+      WORDPRESS_DB_PASSWORD: $db_password
+      WORDPRESS_TABLE_PREFIX: $db_table_prefix
+      WORDPRESS_DEBUG: $wp_debug_mode
+      DISABLED_PLUGINS: $wp_plugins_to_disable
+      VIRTUAL_HOST: $domain
+      LETSENCRYPT_HOST: $domain
+      LETSENCRYPT_EMAIL: $letsencrypt_email
+      WP_HOME: $production_url
+      WP_SITEURL: $production_url
 
   nginx:
     image: jwilder/nginx-proxy:alpine
@@ -58,7 +65,7 @@ services:
       - ./nginx/vhost.d:/etc/nginx/vhost.d
       - ./wordpress:/usr/share/nginx/html
     environment:
-      DEFAULT_EMAIL: ${LETSENCRYPT_EMAIL}
+      DEFAULT_EMAIL: $letsencrypt_email
       NGINX_PROXY_CONTAINER: nginx-proxy
 
   
