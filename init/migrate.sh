@@ -8,8 +8,8 @@
 # Updates URL in database so the site can run on localhost
 #
 
-export new_url="https://${domain}"
-export old_url="https://${old_domain}"
+export new_url="https://lektorenverband.de"
+export old_url="https://blog-dev.vfll.de"
 
 mysql -uroot -p$MYSQL_ROOT_PASSWORD -D$MYSQL_DATABASE -e "
 UPDATE ${WORDPRESS_TABLE_PREFIX}options SET option_value = REPLACE(option_value, '${old_url}', '${new_url}') WHERE option_name = 'home' OR option_name = 'siteurl'; 

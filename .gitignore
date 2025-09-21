@@ -3,12 +3,13 @@
 Material/
 .vscode
 
+database/
 db/data/
-# db/init/
+db/init/backup.sql.gz
 
-wordpress/wp-content/uploads/
-wordpress/wp-content/cache/
-wordpress/wp-content/upgrade/
+wordpress/wp-content
+wordpress/wp-content
+wordpress/wp-content
 
 certs/
 
